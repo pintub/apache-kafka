@@ -1,5 +1,6 @@
 # apache-kafka v3.x
 
+## Kafka Theory
 - Pull Model
 - Message in a partition gets an id, called Offset. Offset read is possible unlike JMS
 - Kafka logs are immutable, so topics can be easily replicated
@@ -100,3 +101,23 @@
   - Difficult to manage two system from admin point of view
   - Single security model if ZK removed
   - [ZK Centralized vs KRaft Decentralized](KRaft_Architecture.PNG), i.e. one of broker acts as quorum leader
+
+## Kafka Installation
+- [Refer PDF for flow](Install+Kafka+Diagram.pdf)
+- [Refer for Different platform installation](https://www.conduktor.io/kafka/starting-kafka)
+- Windows
+  - Kafka not supposed to on native windows, run either on VM or Docker
+
+## Kafka CLI
+- Use --bootstrap-server instead of --zookeeper, as all CLI commands upgraded to work w/o ZK
+- [Refer](udemy-part1/1-kafka-cli)
+- Producing to a non-existing topic, Kafka creates a topic for you
+- Kafka consumer by default reads from end of topic, to read from beginning specify `--from-beginning`
+- If a consumer reading w/o group, Kafka creates a CG with name `console-consumer-[0-9+]`. But unlike actual groups, 
+  if consumer die, this special CG is removed so consumer offset not maintained for this CG
+- [How Consumer Group looks](CG_Describe.png)
+- Offset seek/Tweaking so that consumer can read differently than ordered reading
+  - Done at CG command, not consumer command
+  - `--reset-offsets --to-earliest --execute --topic topic.name` (Will re-read from beginning for each partition of 
+    that topic)
+  - `--reset-offsets --shift-by 2 --execute --topic topic.name` (Will skip 2 offsets for each partition of that topic)

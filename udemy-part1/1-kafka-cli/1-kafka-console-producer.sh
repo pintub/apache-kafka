@@ -18,7 +18,7 @@ kafka-console-producer.sh --bootstrap-server localhost:9092 --topic first_topic 
 > fun learning!
 
 
-# producing to a non existing topic
+# producing to a non existing topic (Kafka creates a topic for you)
 kafka-console-producer.sh --bootstrap-server localhost:9092 --topic new_topic
 > hello world!
 

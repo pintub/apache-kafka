@@ -33,10 +33,10 @@ public class ProducerDemo {
         // send the data - asynchronous
         producer.send(producerRecord);
 
-        // flush data - synchronous
+        // flush data - synchronous,i.e. blocks at this line to send all records until this line to kafka topic
         producer.flush();
 
-        // flush and close producer
+        // close producer, i.e. close() also flushes
         producer.close();
 
     }

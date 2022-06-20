@@ -111,13 +111,18 @@
 ## Kafka CLI
 - Use --bootstrap-server instead of --zookeeper, as all CLI commands upgraded to work w/o ZK
 - [Refer](udemy-part1/1-kafka-cli)
-- Producing to a non-existing topic, Kafka creates a topic for you
+- Producing to a non-existing topic, Kafka creates a topic for you with replication factor=1, partition=1
 - Kafka consumer by default reads from end of topic, to read from beginning specify `--from-beginning`
 - If a consumer reading w/o group, Kafka creates a CG with name `console-consumer-[0-9+]`. But unlike actual groups, 
   if consumer die, this special CG is removed so consumer offset not maintained for this CG
 - [How Consumer Group looks](CG_Describe.png)
 - Offset seek/Tweaking so that consumer can read differently than ordered reading
-  - Done at CG command, not consumer command
+  - Done at CG command using `kafka-consumer-groups`, not consumer command
   - `--reset-offsets --to-earliest --execute --topic topic.name` (Will re-read from beginning for each partition of 
     that topic)
   - `--reset-offsets --shift-by 2 --execute --topic topic.name` (Will skip 2 offsets for each partition of that topic)
+
+## Kafka SDK
+- official SDK java SDK, i.e. apache-kafka-clients
+- Example of the course
+  - Producer Demo

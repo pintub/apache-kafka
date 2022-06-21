@@ -74,7 +74,8 @@
 - Producer Delivery Semantics(How producer can choose to rcv ACK from broker)
   - ACKS=0, producer won't wait for ACK(Possible data loss)
   - ACKS=1, producer wait for ACK from leader broker(limited data loss), so producer can retry
-  - ACKS=-1 or all, producer wait for ACK from all brokers, Ensurers replication happens before ACK(No data loss) 
+  - ACKS=-1 or all(Default), producer wait for ACK from all brokers, Ensurers replication happens before ACK(No data 
+    loss) 
 - Apache Zookeeper
   - ZK is [:face_with_spiral_eyes: centralized, yet distributed](https://medium.com/nakamo-to/whats-the-difference-between-decentralized-and-distributed-1b8de5e7f5a4) service which acts like 
     distributed system coordinator, discovery/naming service
@@ -170,3 +171,28 @@
     - Manual Commit
       - If `enable.auto.commit`= false, then you have to manually call commitAsync() or commitSync()
   - [Advanced consumer examples](./udemy-part2/kafka-basics/src/main/java/io/conduktor/demos/kafka/advanced)
+
+## Kafka Realtime best practices
+- Choose right partition# at the start
+  - Why : If changed, key-partition assignment would change
+  - How to choose
+    - Partition helps in parallelism of consumers, implies better throughput
+    - Faster /high volume producers, create more topics
+    - If more brokers, keep more partition for horizontal scaling
+    - Con : More Partition means more election for leader election
+    - `Note` :Don't create partition for each user or customer, if you do, those will in millions of number and of 
+      no use. Basically you want customer or user data to be ordered , so use key as "user_id" and even 10 partitions will help achieve ordering requirement
+  - Guidelines from Kafka
+    - With ZK
+      - Total partition# <= 2L per cluster
+      - Total partition# <= 4k per broker
+    - With KRaft
+      - Millions of partitions can be supported
+- Choose right Replication Factor at the start
+  - Why: If changed, more replication , more usage of n/w resources
+  - How to choose
+    - At least 2, preferred 3, max 4
+    - More replication factor, more latency if producers uses acks=all(which is default)
+    - More replication factor, more availability
+- Topic naming convention
+  - 

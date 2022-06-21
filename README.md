@@ -1,4 +1,4 @@
-# apache-kafka v3.x
+# apache-kafka v3.x ([Courtesy](https://www.udemy.com/course/apache-kafka/learn/lecture/11567174#learning-tools))
 
 ## Kafka Theory
 - Pull Model

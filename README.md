@@ -41,6 +41,7 @@
       - Possibility of reading the message more than once.
       - `Best practice` Make the consumer processing idempotent,i.e. Processing same message again should not impact system
     - Moderate throughput and Moderate latency
+    - java sdk by default uses this
   - `Exactly once`
     - Requirement -> Deliver only once and no Data loss
     - Make consumer idempotent(Notice difference vs At least once, there processing is idempotent),i.e. maintain a 
@@ -73,7 +74,7 @@
 - Producer Delivery Semantics(How producer can choose to rcv ACK from broker)
   - ACKS=0, producer won't wait for ACK(Possible data loss)
   - ACKS=1, producer wait for ACK from leader broker(limited data loss), so producer can retry
-  - ACKS=all, producer wait for ACK from all brokers, Ensurers replication happens before ACK(No data loss) 
+  - ACKS=-1 or all, producer wait for ACK from all brokers, Ensurers replication happens before ACK(No data loss) 
 - Apache Zookeeper
   - ZK is [:face_with_spiral_eyes: centralized, yet distributed](https://medium.com/nakamo-to/whats-the-difference-between-decentralized-and-distributed-1b8de5e7f5a4) service which acts like 
     distributed system coordinator, discovery/naming service
@@ -123,6 +124,49 @@
   - `--reset-offsets --shift-by 2 --execute --topic topic.name` (Will skip 2 offsets for each partition of that topic)
 
 ## Kafka SDK
-- official SDK java SDK, i.e. apache-kafka-clients
-- Example of the course
-  - Producer Demo
+- Official SDK is java SDK, i.e. apache-kafka-clients
+- Examples of the course
+  - Producer async send with or w/o keys
+  - Producer with callback and exception handler
+  - `StickyPartitioner`
+    - Ideally when no key for a message, messages should be sent ot partitions in a round-robin fashion, But for 
+      optimization purpose, messages are sent batches if sent with less time gap to same partition. This is 
+      StickyPartitioner behavior. 
+    - How to break this behavior ?? (Just for testing, but sticky is better and performant)
+      - Just add a sleep between sending messages, It would send to partition in round-robin
+  - Consumer with :infinity: loop polling and no graceful exit
+  - [Consumer with :infinity: loop polling and graceful exit](./udemy-part2/kafka-basics/src/main/java/io/conduktor/demos/kafka/ConsumerDemoWithShutdown.java)
+  - `Partition re-balancing` with multiple consumers of a CG[1 topic, 3 partitions]
+    - Happens when partition added/removed or consumer added/removed of a CG
+    - Steps
+      - 1>Run one consumer , it's assigned all 3 partitions
+      - 2>Start another instance of same consumer, partition balancing happens. Consumer1 log shows that consumer 
+        leaves group, partitions revoked, then 2 partitions assigned to consumer, and Consumer2 might get 1 partition.
+        Consumer2 consumes starting from leftover offsets.
+  - `Partition re-balancing` Strategies (This section proves why re-balancing is an overhead)
+    - `parition.assignment.strategy` property
+    - 2 types
+      - Eager Rebalance (Stop-the-world rebalance)
+        - When consumer added, stop all consumers, remove all partition assignments, reassign partitions to all consumers
+        - Examples : RangeAssignor(Default), RoundRobin, StickyAssignor
+      - Cooperative Rebalance(Incremental rebalance)
+        - Reassigns only subset of partitions to consumers, meanwhile other untouched consumers can continue polling
+        - Not stop-the-world
+        - :face_with_spiral_eyes: Rebalancing can happen in multiple iterations until stable assignment is attained, 
+          hence called incremental rebalancing
+        - - Examples : CooperativeStickyAssignor
+  - How to make a consumer read from same partition by using `Static group membership`
+    - :metal: `Static group membership` => Static assignment of consumer to partition
+    - Each consumer has a group member id, in case of re-balancing, the consumer leaves the group(Refer above section), as given new group member ID.
+    - Instead, we can define static group member id while creating consumer using `group.instance.id` property
+    - If a static member consumer is down, it has upto `session.timeout.ms` millisecond to join back and get back same 
+      previous partition assignments
+      - If timeout expires, partition will be reassigned to another consumer
+    - `Best Practice`: Useful when consumer is stateful or maintains cache
+  - Consumer offset commit
+    - Auto-Commit
+      - By default, java sdk uses at-least at periodic interval, iff `enable.auto.commit`= true & `auto.commit.
+        interval.ms = 5000`and poll() used, the auto-commits every 5 sec. commitAsync() called behind the scenes.
+    - Manual Commit
+      - If `enable.auto.commit`= false, then you have to manually call commitAsync() or commitSync()
+  - [Advanced consumer examples](./udemy-part2/kafka-basics/src/main/java/io/conduktor/demos/kafka/advanced)

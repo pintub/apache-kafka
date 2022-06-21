@@ -32,7 +32,7 @@ public class ProducerDemoWithCallback {
             ProducerRecord<String, String> producerRecord =
                     new ProducerRecord<>("demo_java", "hello world " + i);
 
-            // send the data - asynchronous
+            // send the data - asynchronous with Callback
             producer.send(producerRecord, new Callback() {
                 @Override
                 public void onCompletion(RecordMetadata metadata, Exception e) {

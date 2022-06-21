@@ -38,11 +38,11 @@ public class ConsumerDemoWithShutdown {
         // get a reference to the current thread
         final Thread mainThread = Thread.currentThread();
 
-        // adding the shutdown hook
+        // adding the shutdown hook, which will run in a different thread only when JVM shuts down
         Runtime.getRuntime().addShutdownHook(new Thread() {
             public void run() {
                 log.info("Detected a shutdown, let's exit by calling consumer.wakeup()...");
-                consumer.wakeup();
+                consumer.wakeup();//Wakes up consumer from polling state ,i.e. poll()
 
                 // join the main thread to allow the execution of the code in the main thread
                 try {
@@ -70,7 +70,7 @@ public class ConsumerDemoWithShutdown {
                 }
 
             }
-        } catch (WakeupException e) {
+        } catch (WakeupException e) {//WakeupException thrown when consumer.wakeup() called
             log.info("Wake up exception!");
             // we ignore this as this is an expected exception when closing a consumer
         } catch (Exception e){

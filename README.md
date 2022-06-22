@@ -136,6 +136,8 @@
     - How to break this behavior ?? (Just for testing, but sticky is better and performant)
       - Just add a sleep between sending messages, It would send to partition in round-robin
   - Consumer with :infinity: loop polling and no graceful exit
+    - :face_with_spiral_eyes: A consumer can listen to multiple topics, offset commit would determine how much of 
+      each topic/partition read
   - [Consumer with :infinity: loop polling and graceful exit](./udemy-part2/kafka-basics/src/main/java/io/conduktor/demos/kafka/ConsumerDemoWithShutdown.java)
   - `Partition re-balancing` with multiple consumers of a CG[1 topic, 3 partitions]
     - Happens when partition added/removed or consumer added/removed of a CG
@@ -173,6 +175,8 @@
   - [Advanced consumer examples](./udemy-part2/kafka-basics/src/main/java/io/conduktor/demos/kafka/advanced)
 
 ## Kafka Realtime best practices
+- How many producer for one or more topics
+  - [Refer](https://stackoverflow.com/questions/21376715/how-many-producers-to-create-in-kafka)
 - Choose right partition# at the start
   - Why : If changed, key-partition assignment would change
   - How to choose

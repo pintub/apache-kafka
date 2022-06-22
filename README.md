@@ -177,6 +177,10 @@
 ## Kafka Realtime best practices
 - How many producer for one or more topics
   - [Refer](https://stackoverflow.com/questions/21376715/how-many-producers-to-create-in-kafka)
+- How many consumer for a topic
+  - Ideally consumer# = partition#
+  - For multi-threading, follow one consumer-per-thread rule, as consumer not thread safe
+    - [Refer](https://www.oreilly.com/library/view/kafka-the-definitive/9781491936153/ch04.html#:~:text=You%20can't%20have%20multiple,each%20in%20its%20own%20thread), & [Refer](https://www.confluent.io/blog/kafka-consumer-multi-threaded-messaging/)
 - Choose right partition# at the start
   - Why : If changed, key-partition assignment would change
   - How to choose

@@ -177,6 +177,7 @@
 ## Kafka Realtime best practices
 - How many producer for one or more topics
   - [Refer](https://stackoverflow.com/questions/21376715/how-many-producers-to-create-in-kafka)
+- [How to design topics/paritions based on events & actions, there is not single golden Rule](https://www.confluent.io/blog/put-several-event-types-kafka-topic/)
 - How many consumer for a topic
   - Ideally consumer# = partition#
   - For multi-threading, follow one consumer-per-thread rule, as consumer not thread safe

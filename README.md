@@ -178,6 +178,8 @@
 - How many producer for one or more topics
   - [Refer](https://stackoverflow.com/questions/21376715/how-many-producers-to-create-in-kafka)
 - [How to design topics/paritions based on events & actions, there is not single golden Rule](https://www.confluent.io/blog/put-several-event-types-kafka-topic/)
+  - Think about what consumer wants, But even consumer discards some% of messages, it's fine. Please refer above link
+  - Think about ordering of event matters from consumer point of view??
 - How many consumer for a topic
   - Ideally consumer# = partition#
   - For multi-threading, follow one consumer-per-thread rule, as consumer not thread safe
@@ -203,5 +205,5 @@
     - At least 2, preferred 3, max 4
     - More replication factor, more latency if producers uses acks=all(which is default)
     - More replication factor, more availability
-- Topic naming convention
+- Topic naming conventions
   - 

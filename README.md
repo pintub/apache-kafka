@@ -140,7 +140,8 @@
       each topic/partition read
   - [Consumer with :infinity: loop polling and graceful exit](./udemy-part2/kafka-basics/src/main/java/io/conduktor/demos/kafka/ConsumerDemoWithShutdown.java)
   - `Partition re-balancing` with multiple consumers of a CG[1 topic, 3 partitions]
-    - Happens when partition added/removed or consumer added/removed of a CG
+    - `When happens`
+      - when partition added/removed/considered DEAD(because of long-running process) or consumer added/removed of a CG
     - Steps
       - 1>Run one consumer , it's assigned all 3 partitions
       - 2>Start another instance of same consumer, partition balancing happens. Consumer1 log shows that consumer 
@@ -184,13 +185,17 @@
   - Ideally consumer# = partition#
   - For multi-threading, follow one consumer-per-thread rule, as consumer not thread safe
     - [Refer](https://www.oreilly.com/library/view/kafka-the-definitive/9781491936153/ch04.html#:~:text=You%20can't%20have%20multiple,each%20in%20its%20own%20thread), & [Refer](https://www.confluent.io/blog/kafka-consumer-multi-threaded-messaging/)
+- Choose right Broker#
+  - Based on data volume, i.e. Data volume = GB/hours * 24 hours * 30 (days) * 12 (months) * (Consider some years)
+    Data volume / Broker Size
+  - :metal: increasing broker disk size or number of brokers does not re-balance
 - Choose right partition# at the start
   - Why : If changed, key-partition assignment would change
   - How to choose
     - Partition helps in parallelism of consumers, implies better throughput
     - Faster /high volume producers, create more topics
     - If more brokers, keep more partition for horizontal scaling
-    - Con : More Partition means more election for leader election
+    - Con : More Partition means more election for leader election. Also, more E2E latency because of replication.
     - `Note` :Don't create partition for each user or customer, if you do, those will in millions of number and of 
       no use. Basically you want customer or user data to be ordered , so use key as "user_id" and even 10 partitions will help achieve ordering requirement
   - Guidelines from Kafka
@@ -199,7 +204,7 @@
       - Total partition# <= 4k per broker
     - With KRaft
       - Millions of partitions can be supported
-- Choose right Replication Factor at the start
+- Choose right Replication Factor# at the start
   - Why: If changed, more replication , more usage of n/w resources
   - How to choose
     - At least 2, preferred 3, max 4
@@ -207,3 +212,6 @@
     - More replication factor, more availability
 - Topic naming conventions
   - 
+
+- Use-cases and Design
+  - Refer course

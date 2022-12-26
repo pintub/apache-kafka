@@ -3,6 +3,9 @@
 ## Kafka Theory
 - Pull Model
 - Message in a partition gets an id, called Offset. Offset read is possible unlike JMS
+- JMS vs Kafka
+  - JMS ; message deleted once read unlike topic
+  - JMS : waits for consumer to ack the message read & sends next message, whereas kafka lets consumer to keep track of messages via offset
 - Kafka logs are immutable, so topics can be easily replicated
 - Traditional message Q vs kafka
   - Event gets deleted from Traditional Q or topic once consumed. Kafka persists until event expires(Default 1 week)

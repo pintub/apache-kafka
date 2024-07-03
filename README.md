@@ -197,7 +197,7 @@
   - For multi-threading, follow one consumer-per-thread rule, as consumer not thread safe
     - [Refer](https://www.oreilly.com/library/view/kafka-the-definitive/9781491936153/ch04.html#:~:text=You%20can't%20have%20multiple,each%20in%20its%20own%20thread), & [Refer](https://www.confluent.io/blog/kafka-consumer-multi-threaded-messaging/)
 - Choose right Broker#
-  - Based on data volume, i.e. Data volume = GB/hours * 24 hours * 30 (days) * 12 (months) * (Consider some years)
+  - Based on data volume, i.e. Data volume = GB/hours * 24 hours * x days(which is `retention period`) <br/>
     Data volume / Broker Size
   - :metal: increasing broker disk size or number of brokers does not re-balance
 - Choose right partition# at the start

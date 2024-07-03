@@ -12,6 +12,7 @@
   - Traditional Q FIFO, offset seek not possible
 - Kafka Message Format
   - [Format](kafkaMessageFormat.png)
+  - Contains `TimeStamp`
   - Key can be numeric or string or anything 
   - If event has no key, events distributed across partition in round-robin fashion. If event has key, hash(key)%partitionSize => decides which partition that event goes into
     - Murmur2 algo for Hashing
@@ -42,14 +43,21 @@
   - `At least once`(Preferred): Commits offset once message `received + processed`
     - Implication
       - Possibility of reading the message more than once.
-      - `Best practice` Make the consumer processing idempotent,i.e. Processing same message again should not impact system
+      - `Best practice` Make the consumer processing idempotent,i.e. Processing same message again should not impact system. Idempotency can be achieved by de-duplication.
     - Moderate throughput and Moderate latency
     - java sdk by default uses this
   - `Exactly once`
-    - Requirement -> Deliver only once and no Data loss
-    - Make consumer idempotent(Notice difference vs At least once, there processing is idempotent),i.e. maintain a 
-      state at consumer end and filter out the duplicate events.
-    - Low throughput and High latency
+    - For ConsumeFromTopic1-process-ProduceToTopic2 usecase, By using `Kafka Transaction`, so that down-stream consumer(i.e. consumer of Topic2) receives `exactly once`
+    - Refer
+      - [LinkedIn Post](https://www.linkedin.com/feed/update/urn:li:activity:6900760920604106752?updateEntityUrn=urn%3Ali%3Afs_updateV2%3A%28urn%3Ali%3Aactivity%3A6900760920604106752%2CFEED_DETAIL%2CEMPTY%2CDEFAULT%2Cfalse%29&lipi=urn%3Ali%3Apage%3Ad_flagship3_myitems_savedposts%3BP%2BEmBT8yRtKDfGSCR1HmLQ%3D%3D)
+    - Things to Learn
+      -  How to make producer Idempotent
+      -  How to make consumer Idempotent
+      -  If a consumer process data by inserting to DB & sends the data further to next topic, How to make DB txn + Send to Kafka Topic txn atomic. By [Transaction Outbox](https://docs.aws.amazon.com/prescriptive-guidance/latest/cloud-design-patterns/transactional-outbox.html). Basically persist data in `Outbox event` Table before sending to nest topic
+      -  How to use `kafka transaction` to make ConsumeFromTopic1-process-ProduceToTopic2 atomic
+        -   Producer of Topic2 should be Idempotent & start a kafka txn
+        -   Send consumer offsets of Topic1 to above Producer's txn
+        -   Make Consumer of Topic2 READ_COMMITED isolation level
 - Kafka Cluster & broker
   - Each kafka server or node -> Broker. If more than one broker, Kafka is called cluster
   - Broker contains partition of different topic,i.e. n partitions of a topic can be distributed in different 

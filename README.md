@@ -1,7 +1,9 @@
 # apache-kafka v3.x ([Courtesy](https://www.udemy.com/course/apache-kafka/learn/lecture/11567174#learning-tools))
 
 ## Kafka Theory
-- Pull Model
+- Why Pull Model
+  - Impedence misMatch :If Producer is faster than consumer, But still Broker can health-check and push to the right instance
+  - Offset Tracking : With pull model the onus is on consumer to track offset & resume pulling with new consumers
 - Message in a partition gets an id, called Offset. Offset read is possible unlike JMS
 - JMS vs Kafka
   - JMS ; message deleted once read unlike topic

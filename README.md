@@ -69,12 +69,14 @@
     - For [ConsumeFromTopic1-process-ProduceToTopic2](https://media.licdn.com/dms/image/v2/C4E12AQGkGEd6dGlRPQ/article-inline_image-shrink_1500_2232/article-inline_image-shrink_1500_2232/0/1645268711847?e=1730937600&v=beta&t=4GZK5WeprMzzZhdrQgEsG-BgmOc6F4WWXb0qIPUL1bE) usecase, By using `Kafka Transaction`, so that down-stream consumer(i.e. consumer of Topic2) receives `exactly once`
     - [Refer LinkedIn Post](https://www.linkedin.com/feed/update/urn:li:activity:6900760920604106752?updateEntityUrn=urn%3Ali%3Afs_updateV2%3A%28urn%3Ali%3Aactivity%3A6900760920604106752%2CFEED_DETAIL%2CEMPTY%2CDEFAULT%2Cfalse%29&lipi=urn%3Ali%3Apage%3Ad_flagship3_myitems_savedposts%3BP%2BEmBT8yRtKDfGSCR1HmLQ%3D%3D)
     - Things to Learn
-      - [How to make producer Idempotent, Only with configurations, But learn concept. Broker can reject the dup message or re-order last n messages based max.in.flight.per.connection = n setting](https://www.linkedin.com/pulse/kafka-idempotent-producer-rob-golder/). [Configurations](https://media.licdn.com/dms/image/v2/C4D12AQGw0RIaghNN5A/article-inline_image-shrink_1500_2232/article-inline_image-shrink_1500_2232/0/1637697739516?e=1730937600&v=beta&t=2yyQNBZ_rR5239K2YbREiM54edf3yvGB57TXVb5GuFk)        
-      -  How to make consumer Idempotent
+      - `Idempotent Producer` means message to be there in broker exactly-once & Ordering should be preserved. Challenges: A message send may fail or a ACK might fail even after storing in broker. [How to make Producer Idempotent, Only with configurations, But learn the concepts. Broker can reject the dup message or re-order last n messages based max.in.flight.per.connection = n setting](https://www.linkedin.com/pulse/kafka-idempotent-producer-rob-golder/). [Configurations](https://media.licdn.com/dms/image/v2/C4D12AQGw0RIaghNN5A/article-inline_image-shrink_1500_2232/article-inline_image-shrink_1500_2232/0/1637697739516?e=1730937600&v=beta&t=2yyQNBZ_rR5239K2YbREiM54edf3yvGB57TXVb5GuFk)        
+      -  `Idempotent consumer` means no impact at consumer even if dup message is received . How to make consumer Idempotent? Use De-Dup Pattern.
       -  If a consumer process data by inserting to DB & sends the data further to next topic, How to make DB txn + Send to Kafka Topic txn atomic. By [Transaction Outbox](https://docs.aws.amazon.com/prescriptive-guidance/latest/cloud-design-patterns/transactional-outbox.html). Basically persist data in `Outbox event` Table before sending to nest topic
     -  How to use `kafka transaction` to make ConsumeFromTopic1-process-ProduceToTopic2 atomic
-        -   Producer of Topic2 should be Idempotent & start a kafka txn
-        -   Send consumer offsets of Topic1 to above Producer's txn
+        -   Consumer of Topic1 should be Idempotent & use Txn Outbox Pattern
+        -   Producer of Topic2 should be Idempotent & Begin a kafka txn
+        -   Send consumer offsets information of Topic1 to above Producer, so that they will be part of Txn
+        -   Producer Commits Txn, So Topic1 consumer marks the n messages as processed & these n messages are sent to Topic2
         -   Make Consumer of Topic2 READ_COMMITED isolation level
 - Kafka Cluster & broker
   - Each kafka server or node -> Broker. If more than one broker, Kafka is called cluster

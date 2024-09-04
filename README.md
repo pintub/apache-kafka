@@ -37,6 +37,21 @@
     - Consumer from a group `periodically` commits offset while consuming data and Kafka writes the offset to the 
       `__consumer_offsets` topic
     - If a consumer dies, another is spawn, it can resume reading from the same offset where previous consumer died.
+- Producer Delivery Semantics(How producer can choose to rcv ACK from broker)
+  - ACKS=0, producer won't wait for ACK(Possible data loss)
+  - ACKS=1, producer wait for ACK from leader broker(limited data loss), so producer can retry
+  - ACKS=-1 or all(Default), producer wait for ACK from  min.insync.replicas, Ensurers replication happens before ACK(No data 
+    loss)
+- Sync send() & async send() in Kafka & Myths
+  - Technically, producer always sends to broker asynchrounously. sync send() api means `producer.send(event1).get(), Then producer.send(event2).get()`
+  - What is sync send(event) : Get ack for the message(So, batch.size & linger.ms timeout is not more relevant)
+  - What is async send(event, callback) : send() is not blocked & callback will be called in producer thread itself when ack comes from broker
+  - Both relevant for above "ACKS" types
+  - Ordering
+    - sync send() ensures ordering
+    - async send() have few flavors of send mechanism. <br/>
+    If batching is used, then whole batch fails or succeeds. Retry also retries whole batch if send fails or ack from broker fails<br/>
+    Other flavor is If `max.in.flight.per.connection` is used(which means max unacknowledged batches producer can send before ack), Order might fail. i.e. batch2 is successful , but batch1 fails & retried post that. How to fix this ? `idempotent Producer` + `retries  > 0` + `acks=all` fixes this. `idempotent Producer` sends a seq number with each message, which broker uses to de-dup or maintain order of last 5 batches(if max.in.flight.per.connection = 5). Then broker commits & consumer only sees the commited data, which is already ordered.  
 - Consumer Delivery semantics (When consumer commits offset)
   - `At most once`: Commits offset once message `received`
     - Implication
@@ -49,11 +64,11 @@
     - Moderate throughput and Moderate latency
     - java sdk by default uses this
   - `Exactly once`
-    - For ConsumeFromTopic1-process-ProduceToTopic2 usecase, By using `Kafka Transaction`, so that down-stream consumer(i.e. consumer of Topic2) receives `exactly once`
+    - For [ConsumeFromTopic1-process-ProduceToTopic2](https://media.licdn.com/dms/image/v2/C4E12AQGkGEd6dGlRPQ/article-inline_image-shrink_1500_2232/article-inline_image-shrink_1500_2232/0/1645268711847?e=1730937600&v=beta&t=4GZK5WeprMzzZhdrQgEsG-BgmOc6F4WWXb0qIPUL1bE) usecase, By using `Kafka Transaction`, so that down-stream consumer(i.e. consumer of Topic2) receives `exactly once`
     - Refer
       - [LinkedIn Post](https://www.linkedin.com/feed/update/urn:li:activity:6900760920604106752?updateEntityUrn=urn%3Ali%3Afs_updateV2%3A%28urn%3Ali%3Aactivity%3A6900760920604106752%2CFEED_DETAIL%2CEMPTY%2CDEFAULT%2Cfalse%29&lipi=urn%3Ali%3Apage%3Ad_flagship3_myitems_savedposts%3BP%2BEmBT8yRtKDfGSCR1HmLQ%3D%3D)
     - Things to Learn
-      -  How to make producer Idempotent
+      -  [How to make producer Idempotent, Only with configurations, But learn concept. Broker can reject the dup message or re-order last n messages based max.in.flight.per.connection = n setting](https://www.linkedin.com/pulse/kafka-idempotent-producer-rob-golder/)
       -  How to make consumer Idempotent
       -  If a consumer process data by inserting to DB & sends the data further to next topic, How to make DB txn + Send to Kafka Topic txn atomic. By [Transaction Outbox](https://docs.aws.amazon.com/prescriptive-guidance/latest/cloud-design-patterns/transactional-outbox.html). Basically persist data in `Outbox event` Table before sending to nest topic
       -  How to use `kafka transaction` to make ConsumeFromTopic1-process-ProduceToTopic2 atomic
@@ -84,11 +99,6 @@
     - Producer writes to `only` broker that's leader of partition
     - Consumer reads from `by default` broker that's leader of partition. But kafka 2.4+ version, consumer can fetch data from ISR partition
   - SO, each partition has leader and ISR(in-sync-replica) or OSR(out-sync-replica)/if replication ha not happened
-- Producer Delivery Semantics(How producer can choose to rcv ACK from broker)
-  - ACKS=0, producer won't wait for ACK(Possible data loss)
-  - ACKS=1, producer wait for ACK from leader broker(limited data loss), so producer can retry
-  - ACKS=-1 or all(Default), producer wait for ACK from  min.insync.replicas, Ensurers replication happens before ACK(No data 
-    loss) 
 - Apache Zookeeper
   - ZK is [:face_with_spiral_eyes: centralized, yet distributed](https://medium.com/nakamo-to/whats-the-difference-between-decentralized-and-distributed-1b8de5e7f5a4) service which acts like 
     distributed system coordinator, discovery/naming service

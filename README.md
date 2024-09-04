@@ -87,7 +87,7 @@
 - Producer Delivery Semantics(How producer can choose to rcv ACK from broker)
   - ACKS=0, producer won't wait for ACK(Possible data loss)
   - ACKS=1, producer wait for ACK from leader broker(limited data loss), so producer can retry
-  - ACKS=-1 or all(Default), producer wait for ACK from all brokers, Ensurers replication happens before ACK(No data 
+  - ACKS=-1 or all(Default), producer wait for ACK from  min.insync.replicas, Ensurers replication happens before ACK(No data 
     loss) 
 - Apache Zookeeper
   - ZK is [:face_with_spiral_eyes: centralized, yet distributed](https://medium.com/nakamo-to/whats-the-difference-between-decentralized-and-distributed-1b8de5e7f5a4) service which acts like 

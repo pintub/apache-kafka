@@ -69,6 +69,7 @@
       - [LinkedIn Post](https://www.linkedin.com/feed/update/urn:li:activity:6900760920604106752?updateEntityUrn=urn%3Ali%3Afs_updateV2%3A%28urn%3Ali%3Aactivity%3A6900760920604106752%2CFEED_DETAIL%2CEMPTY%2CDEFAULT%2Cfalse%29&lipi=urn%3Ali%3Apage%3Ad_flagship3_myitems_savedposts%3BP%2BEmBT8yRtKDfGSCR1HmLQ%3D%3D)
     - Things to Learn
       -  [How to make producer Idempotent, Only with configurations, But learn concept. Broker can reject the dup message or re-order last n messages based max.in.flight.per.connection = n setting](https://www.linkedin.com/pulse/kafka-idempotent-producer-rob-golder/)
+        - [Configurations](https://media.licdn.com/dms/image/v2/C4D12AQGw0RIaghNN5A/article-inline_image-shrink_1500_2232/article-inline_image-shrink_1500_2232/0/1637697739516?e=1730937600&v=beta&t=2yyQNBZ_rR5239K2YbREiM54edf3yvGB57TXVb5GuFk)  
       -  How to make consumer Idempotent
       -  If a consumer process data by inserting to DB & sends the data further to next topic, How to make DB txn + Send to Kafka Topic txn atomic. By [Transaction Outbox](https://docs.aws.amazon.com/prescriptive-guidance/latest/cloud-design-patterns/transactional-outbox.html). Basically persist data in `Outbox event` Table before sending to nest topic
       -  How to use `kafka transaction` to make ConsumeFromTopic1-process-ProduceToTopic2 atomic

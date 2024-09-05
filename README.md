@@ -221,7 +221,7 @@
     - Partition helps in parallelism of consumers, implies better throughput
     - Faster /high volume producers, create more topics
     - If more brokers, keep more partition for horizontal scaling
-    - Con : More Partition means more time consumer leader election. Also, more E2E latency because of replication.
+    - Con : More Partition means more time consumer leader election, as each partition needs a leader
     - `Note` :Don't create partition for each user or customer, if you do, those will in millions of number and of 
       no use. Basically you want customer or user data to be ordered , so use key as "user_id" and even 10 partitions will help achieve ordering requirement
   - Guidelines from Kafka

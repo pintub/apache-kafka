@@ -73,7 +73,7 @@
       -  `Idempotent consumer` means no impact at consumer even if dup message is received . How to make consumer Idempotent? Use De-Dup Pattern.
       -  If a consumer process data by inserting to DB & sends the data further to next topic, How to make DB txn + Send to Kafka Topic txn atomic. By [Transaction Outbox](https://docs.aws.amazon.com/prescriptive-guidance/latest/cloud-design-patterns/transactional-outbox.html). Basically persist data in `Outbox event` Table before sending to nest topic
     -  How to use `kafka transaction` to make ConsumeFromTopic1-process-ProduceToTopic2 atomic
-        -   Consumer of Topic1 should be Idempotent & use Txn Outbox Pattern
+        -   Consumer of Topic1 should be Idempotent & use Txn Outbox Pattern to send to Topic2
         -   Producer of Topic2 should be Idempotent & Begin a kafka txn
         -   Send consumer offsets information of Topic1 to above Producer, so that they will be part of Txn
         -   Producer Commits Txn, So Topic1 consumer marks the n messages as processed & these n messages are sent to Topic2

@@ -216,12 +216,12 @@
     Data volume / Broker Size
   - :metal: increasing broker disk size or number of brokers does not re-balance
 - Choose right partition# at the start
-  - Why : If changed, key-partition assignment would change
+  - Why : If changed, key-partition assignment would change. SO send order will be messed-up. Also at consumer end consumer-partition rebalancing will happen .
   - How to choose
     - Partition helps in parallelism of consumers, implies better throughput
     - Faster /high volume producers, create more topics
     - If more brokers, keep more partition for horizontal scaling
-    - Con : More Partition means more election for leader election. Also, more E2E latency because of replication.
+    - Con : More Partition means more time consumer leader election. Also, more E2E latency because of replication.
     - `Note` :Don't create partition for each user or customer, if you do, those will in millions of number and of 
       no use. Basically you want customer or user data to be ordered , so use key as "user_id" and even 10 partitions will help achieve ordering requirement
   - Guidelines from Kafka

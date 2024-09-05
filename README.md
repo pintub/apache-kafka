@@ -4,6 +4,9 @@
 - Why Pull Model
   - Impedence misMatch :If Producer is faster than consumer, But still Broker can health-check and push to the right instance
   - Offset Tracking : With pull model the onus is on consumer to track offset & resume pulling with new consumers
+- What Guarantee kafka provides, which this while designing system
+  -  Default at-least once
+  -  Order within partition w/ configurations. Read below, how w/ async send() you can achieve Ordering
 - Message in a partition gets an id, called Offset. Offset read is possible unlike JMS
 - Kafka logs are immutable & append-only
   - so topics can be easily replicated
@@ -11,7 +14,7 @@
 - JMS vs Kafka
   - JMS ; message deleted once read unlike topic
   - JMS : waits for consumer to ack the message read & sends next message, whereas kafka lets consumer to keep track of messages via offset
-- Traditional message Queue vs kafka
+- Message Queue vs kafka
   - Event gets deleted from Traditional Q or topic once consumed. Kafka persists until event expires(Default 1 week)
   - Traditional Q FIFO, offset seek not possible
   - In Queue, one consumer subscribes queue & gets data
@@ -24,8 +27,12 @@
     - Murmur2 algo for Hashing
     partition# = Math.abs(Utils.murmur2(keyBytes)) % (partitionSize)
     - Producers decide which partition data is written into by using Key
-  - No key Advt: Even distribution across partition
+  - No key Advt
+    - Even distribution across partition
   - Having key Advt:Ordering of events of similar key in a partition ,as events with same key goes into same partition always
+  - `Best Practices`
+    - Consistent hashing can be using for mapping key to partition
+    - Avoid Hot Parition by adding salt or using combination of keys as key etc 
 - Kafka serializer/Deserializer
   - Producer can send in any format and kafka only accepts byte format, That's why kafka serializer. Example, 
     IntegerSerializer, StringSerializer
@@ -92,6 +99,13 @@
   - Kafka client needs to connect to any kafka broker and the rest follow. This "any broker" is `Bootstrap broker`. 
     All brokers eligible to be bootstrap broker
   - [kafka Broker Discovery](KafkaBrokerDiscovery.png)
+- Difference between a topic and a partition
+  - A topic is a logical grouping of messages. A partition is a physical grouping of messages. A topic can have multiple partitions, and each partition can be on a different broker. Topics are just a way to organize your data, while partitions are a way to scale your data.
+  - Partitions are distributed across broker for better load-handling
+- Assignments in Kafka
+  - Partition-Broker, Kafka handles if for better load-handling
+  - Key-partition, Developer can define "Key", which decides which message goes to which Partition
+  - Consumer-Partition, Developer can control the algo how this assignment happens
 - Topic replication factor
   - For redundancy/replication. If a broker goes down, then another broker can have to data of partition
   - [Topic Replication](TopicReplication.png)
@@ -104,7 +118,7 @@
   - Now we have replicas of partition, only one broker can be a leader of a particular partition
   - Rules
     - Producer writes to `only` broker that's leader of partition
-    - Consumer reads from `by default` broker that's leader of partition. But kafka 2.4+ version, consumer can fetch data from ISR partition
+    - Consumer reads from `by default` broker that's leader of partition. But kafka 2.4+ version, consumer can fetch data from ISR partitions, which can be configured via `replica.selector.class` to let developer chooser which broker will serve Read
   - SO, each partition has leader and ISR(in-sync-replica) or OSR(out-sync-replica)/if replication ha not happened
 - Apache Zookeeper
   - ZK is [:face_with_spiral_eyes: centralized, yet distributed](https://medium.com/nakamo-to/whats-the-difference-between-decentralized-and-distributed-1b8de5e7f5a4) service which acts like 
@@ -206,21 +220,46 @@
   - [Advanced consumer examples](./udemy-part2/kafka-basics/src/main/java/io/conduktor/demos/kafka/advanced)
 
 ## Kafka Realtime best practices
+- How to scale Kafka
+  - For scaling Producing 
+    - Scaler brokers, and partitons, so paritions are distributed across brokers and write load is balanced
+    - Use key to avoid hot-parition, so data is distributed across paritions => distributed across brokers
+    - Use Batching
+    - More Producers
+  - For scaling consuming
+    - #Consumers = #Paritions
+    - If intitial #Consumers < #Paritions, Then Auto-scale consumer based on consumer lag(i.e. Consumer offset - Topic offset)
+- Performance optimization
+  - For Producing
+    - use batching, and max.in.flight.per.connection only along with async send()
+    - use compression
+  - For Consuming
+    - #Consumers = #Paritions
 - How many producer for one or more topics
-  - [Refer](https://stackoverflow.com/questions/21376715/how-many-producers-to-create-in-kafka)
+  - [Start with 1 producer Thread, the scale if needed](https://stackoverflow.com/questions/21376715/how-many-producers-to-create-in-kafka)
 - [How to design topics/paritions based on events & actions, there is not single golden Rule](https://www.confluent.io/blog/put-several-event-types-kafka-topic/)
   - Think about what consumer wants, But even consumer discards some% of messages, it's fine. Please refer above link
   - Think about ordering of event matters from consumer point of view??
+- What should be One Message size ?
+  - Can be configured by `message.max.bytes`, but ideally messages should be <= 1 Mb. Should not contain huge messages to avoid n/w latency etc
+  - Example: For Youtube streaming design, no need to send the actual video in kafka stream, instead store video in S3 bucket and send the message which contains video location in S3
+  - Use `Batch.size` & `max.in.flight.per.connection` to avoid n/w hops
+- Retry
+  - Producer End : Kafka provides out of box retry for producers based on configuration
+  - Consumer End : Not out of box. Retry while processing(example, while saving to DB, run back-off retry), If still fail , put message into Dead-Letter-Queue, which can be consumer by another set of consumers. See [Diagram for better intuition](https://d248djf5mc6iku.cloudfront.net/excalidraw/5b0431c9552adb9e764f474c3e19b248)
 - How many consumer for a topic
   - Ideally consumer# = partition#
   - For multi-threading, follow one consumer-per-thread rule, as consumer not thread safe
     - [Refer](https://www.oreilly.com/library/view/kafka-the-definitive/9781491936153/ch04.html#:~:text=You%20can't%20have%20multiple,each%20in%20its%20own%20thread), & [Refer](https://www.confluent.io/blog/kafka-consumer-multi-threaded-messaging/)
+- When a consumer should commit
+  - Default commit is at-least once, i.e. consumer should commit only after processing the message . But it leads to failure scenarios(fails during processing, or during commit) and message can be re-delivered. So,consumer should be idempotent
+  - Also dont write long running consumers, instead split it into multiple phases like Produce - ConsumerSmall - Produce - AgainConsumerSmall . Example: In case of Web Crawler where we broke the crawler into 2 phases: downloading the HTML and then parsing it.
 - Choose right Broker#
   - Based on data volume, i.e. Data volume = GB/hours * 24 hours * x days(which is `retention period`) <br/>
     Data volume / Broker Size
   - :metal: increasing broker disk size or number of brokers does not re-balance
-- Choose right partition# at the start
-  - Why : If changed, key-partition assignment would change. SO send order will be messed-up. Also at consumer end consumer-partition rebalancing will happen .
+- Choose right partition#
+  - Why : If changed, key-partition assignment would change. So send order will be messed-up. Also at consumer end consumer-partition rebalancing will happen .
   - How to choose
     - Partition helps in parallelism of consumers, implies better throughput
     - Faster /high volume producers, create more topics
@@ -241,7 +280,7 @@
     - More replication factor, more latency if producers uses acks=all(which is default)
     - More replication factor, more availability
 - Topic naming conventions
-  - 
+  - Like Java Package names
 
 - Use-cases and Design
   - Refer course

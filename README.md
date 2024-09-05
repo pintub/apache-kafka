@@ -5,13 +5,17 @@
   - Impedence misMatch :If Producer is faster than consumer, But still Broker can health-check and push to the right instance
   - Offset Tracking : With pull model the onus is on consumer to track offset & resume pulling with new consumers
 - Message in a partition gets an id, called Offset. Offset read is possible unlike JMS
+- Kafka logs are immutable & append-only
+  - so topics can be easily replicated
+  - By restricting operations to appending data at the end of the log, Kafka minimizes disk seek times, which are a major bottleneck in many storage systems.
 - JMS vs Kafka
   - JMS ; message deleted once read unlike topic
   - JMS : waits for consumer to ack the message read & sends next message, whereas kafka lets consumer to keep track of messages via offset
-- Kafka logs are immutable, so topics can be easily replicated
-- Traditional message Q vs kafka
+- Traditional message Queue vs kafka
   - Event gets deleted from Traditional Q or topic once consumed. Kafka persists until event expires(Default 1 week)
   - Traditional Q FIFO, offset seek not possible
+  - In Queue, one consumer subscribes queue & gets data
+  - Queue is Point-to-Point communication, whereas Kafka stream is Pub-Sub communication
 - Kafka Message Format
   - [Format](kafkaMessageFormat.png)
   - Contains `TimeStamp`

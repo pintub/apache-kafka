@@ -246,7 +246,8 @@
   - Use `Batch.size` & `max.in.flight.per.connection` to avoid n/w hops
 - Retry
   - Producer End : Kafka provides out of box retry for producers based on configuration
-  - Consumer End : Not out of box. Retry while processing(example, while saving to DB, run back-off retry), If still fail , put message into Dead-Letter-Queue, which can be consumer by another set of consumers. See [Diagram for better intuition](https://d248djf5mc6iku.cloudfront.net/excalidraw/5b0431c9552adb9e764f474c3e19b248)
+  - Consumer End : Not out of box. Retry while processing(example, while saving to DB, run back-off retry), If still fail , put message into Dead-Letter-Queue, which can be consumer by another set of consumers. See [Diagram for better intuition](https://d248djf5mc6iku.cloudfront.net/excalidraw/5b0431c9552adb9e764f474c3e19b248)<br/>
+  Amazon SQS gives Dead-letter-Queue support out of box
 - How many consumer for a topic
   - Ideally consumer# = partition#
   - For multi-threading, follow one consumer-per-thread rule, as consumer not thread safe

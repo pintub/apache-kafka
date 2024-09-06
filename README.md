@@ -221,6 +221,7 @@
 
 ## Kafka Realtime best practices
 - How to scale Kafka
+  - One broker can handle 10k message/sec, of-course a lot depends on message size, configurations etc
   - For scaling Producing 
     - Scaler brokers, and partitons, so paritions are distributed across brokers and write load is balanced
     - Use key to avoid hot-parition, so data is distributed across paritions => distributed across brokers

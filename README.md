@@ -206,6 +206,7 @@
   - Difficult to manage two system from admin point of view
   - Single security model if ZK removed
   - [ZK Centralized vs KRaft Decentralized](KRaft_Architecture.PNG), i.e. one of broker acts as quorum leader
+  - [How KRaft quorum leader election works. Control plane is few broker acts as controller with one being leader, Data Plabe is few broker acts for replication with one being partition-leader](https://developer.confluent.io/courses/architecture/control-plane/)
 
 ## Kafka Installation
 - [Refer PDF for flow](Install+Kafka+Diagram.pdf)

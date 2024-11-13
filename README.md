@@ -31,7 +31,7 @@
     - Even distribution across partition
   - Having key Advt:Ordering of events of similar key in a partition ,as events with same key goes into same partition always
   - `Best Practices`
-    - Consistent hashing can be using for mapping key to partition
+    - Consistent hashing can be using for mapping key to partition (Implement `ConsumerPartitionAssignor`)
     - Avoid Hot Parition by adding salt or using combination of keys as key etc 
 - Kafka serializer/Deserializer
   - Producer can send in any format and kafka only accepts byte format, That's why kafka serializer. Example, 

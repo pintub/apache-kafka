@@ -3,7 +3,7 @@
 ## Kafka Theory
 - Why Pull Model
   - Impedence misMatch :If Producer is faster than consumer, But still Broker can health-check and push to the right instance
-  - Offset Tracking : With pull model the onus is on consumer to track offset & resume pulling with new consumers
+  - Offset Tracking : With pull model the onus is on consumer to track offset & resume pulling with new consumers. Else each topic has to know its consumers, it would be difficult to publish topic to web, tight coulping with consumers
 - What Guarantee kafka provides, which this while designing system
   -  Default at-least once
   -  Order within partition w/ configurations. Read below, how w/ async send() you can achieve Ordering
